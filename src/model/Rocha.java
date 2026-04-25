@@ -6,12 +6,9 @@ public class Rocha extends Obstaculo {
     }
 
     @Override
-    public void bater(Robo robo){
-        System.out.println("EXPLOSÃO!!!");
-        System.out.println("O robo" + robo.getCor() + "atingiu a bomba");
-        System.out.println("Robo destruido e não pode mais se mover");
-
-        robo.setEixoX(-1);
-        robo.setEixoY(-1);
+    public void bater(Robo robo) {
+        System.out.println(">>> OBSTÁCULO: ROCHA <<<");
+        System.out.println("O robô " + robo.getCor() + " colidiu com uma rocha no ID: " + getId());
+        System.out.println("Movimento bloqueado! O robô deve retornar.");
     }
 }
