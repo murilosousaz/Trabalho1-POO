@@ -204,6 +204,36 @@ public abstract class JogoController {
         }
     }
 
+    private void executarTurnoAleatorio(List<Robo> robos) {
+        String[] direcoes = {"up", "down", "right", "left"};
+        for (Robo robo : robos) {
+            if (robo.getEixoX() == -1) continue; // pula destruídos
+            try {
+                robo.mover(direcoes[random.nextInt(4)]);
+                verificarObstaculoNaPosicao(robo);
+            } catch (MovimentoInvalidoException e) {
+                // ignora e tenta no próximo turno
+            }
+        }
+    }
+
+    private void executarTurnoComObstaculos() {
+        executarTurnoAleatorio(tabuleiro.getRobos());
+        if (tabuleiro.todosRobosDestruidos()) {
+            labelStatus.setText("💀 Todos os robôs foram destruídos.");
+        } else if (tabuleiro.algumRoboEncontrouAlimento()) {
+            labelStatus.setText("🏆 Alimento encontrado!");
+        }
+    }
+
+    private void habilitarBotoesMovimento(boolean habilitar) {
+        btnCima.setDisable(!habilitar);
+        btnBaixo.setDisable(!habilitar);
+        btnEsquerda.setDisable(!habilitar);
+        btnDireita.setDisable(!habilitar);
+    }
+
+
 
 
 }
