@@ -1,37 +1,57 @@
 package controller;
 
-import java.util.Scanner;
-import view.EntradaDados; 
-import controller.modos.ModoSimplesController;
-import controller.modos.ModoCompetitivoController;
-import controller.modos.ModoInteligenteController;
-import controller.modos.ModoObstaculosController;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+
+import java.io.IOException;
 
 public class MenuController {
-    // Poode-se remover o Scanner daqui se usar apenas o EntradaDados
-    
-    public void iniciarMenu() {
-        boolean sair = false;
 
-        while (!sair) {
-            System.out.println("=== JOGO DO ROBÔ (LOGO) ===");
-            System.out.println("1. Modo Simples");
-            System.out.println("2. Modo Competitivo");
-            System.out.println("3. Modo Inteligente");
-            System.out.println("4. Modo Obstáculos");
-            System.out.println("0. Sair");
+    @FXML
+    public void onModoSimples(ActionEvent event) {
+        navegarParaJogo(event, "simples");
+    }
 
-            // Certifique-se que lerInteiro existe em EntradaDados!
-            int opcao = EntradaDados.lerInteiro("Escolha uma opção: ");
+    @FXML
+    public void onModoCompetitivo(ActionEvent event) {
+        navegarParaJogo(event, "competitivo");
+    }
 
-            switch (opcao) {
-                case 1 -> new ModoSimplesController().executar();
-                case 2 -> new ModoCompetitivoController().executar();
-                case 3 -> new ModoInteligenteController().executar();
-                case 4 -> new ModoObstaculosController().executar();
-                case 0 -> sair = true;
-                default -> System.out.println("Opção inválida!");
-            }
+    @FXML
+    public void onModoInteligente(ActionEvent event) {
+        navegarParaJogo(event, "inteligente");
+    }
+
+    @FXML
+    public void onModoObstaculos(ActionEvent event) {
+        navegarParaJogo(event, "obstaculos");
+    }
+
+    private void navegarParaJogo(ActionEvent event, String modo) {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/fxml/tabuleiro.fxml")
+            );
+            Parent raiz = loader.load();
+
+            JogoController jogoController = loader.getController();
+            jogoController.iniciarModo(modo);
+
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
+            // 4. Troca a cena
+            stage.setScene(new Scene(raiz));
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
+
+
 }

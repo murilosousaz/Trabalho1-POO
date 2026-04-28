@@ -14,12 +14,12 @@ public class Tabuleiro {
     private List<Obstaculo> obstaculos;
     private final IntegerProperty turnoAtual;
 
-    public Tabuleiro(IntegerProperty turnoAtual, List<Obstaculo> obstaculos, List<Robo> robos, int alimentoY, int alimentoX) {
-        this.turnoAtual = new SimpleIntegerProperty(0);
-        this.obstaculos = new ArrayList<>();
+    public Tabuleiro() {
         this.robos = new ArrayList<>();
-        this.alimentoY = -1;
+        this.obstaculos = new ArrayList<>();
+        this.turnoAtual = new SimpleIntegerProperty(0);
         this.alimentoX = -1;
+        this.alimentoY = -1;
     }
 
     public void adicionarRobo(Robo robo){
@@ -30,7 +30,7 @@ public class Tabuleiro {
         this.obstaculos.add(obstaculo);
     }
 
-    public void removerObstcaulo(int id){
+    public void removerObstaculo(int id){
         obstaculos.removeIf(o -> o.getId() == id);
     }
 
