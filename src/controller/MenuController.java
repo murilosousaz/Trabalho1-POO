@@ -1,5 +1,6 @@
 package controller;
 
+import app.Caminhos;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -20,7 +21,7 @@ public class MenuController {
     private void navegar(ActionEvent event, String modo) {
         try {
             FXMLLoader loader = new FXMLLoader(
-                    app.App.ANCORA.getResource(app.App.FXML_TABULEIRO)
+                    Caminhos.ANCORA.getResource(Caminhos.FXML_TABULEIRO)
             );
             Parent raiz = loader.load();
 

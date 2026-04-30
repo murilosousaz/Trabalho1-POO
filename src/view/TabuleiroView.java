@@ -32,11 +32,11 @@ public class TabuleiroView {
 		this.grid = grid;
 		configurarGrid();
 
-		imgAlimento        = carregarImagem("/images/alimento.png");
-		imgBomba           = carregarImagem("/images/bomba.png");
-		imgRocha           = carregarImagem("/images/rocha.png");
-		imgRoboNormal      = carregarImagem("/images/robo_normal.png");
-		imgRoboInteligente = carregarImagem("/images/robo_inteligente.png");
+		imgAlimento        = carregarImagem("resources/images/alimento.png");
+		imgBomba           = carregarImagem("resources/images/bomba.png");
+		imgRocha           = carregarImagem("resources/images/rocha.png");
+		imgRoboNormal      = carregarImagem("resources/images/robo_normal.png");
+		imgRoboInteligente = carregarImagem("resources/images/robo_inteligente.png");
 
 		configurarGrid();
 	}
@@ -137,7 +137,6 @@ public class TabuleiroView {
 			iv.setSmooth(true);
 			pane.getChildren().add(iv);
 		} else {
-			// Fallback: emoji colorido se a imagem não existir
 			Label label = new Label(emojiFallback);
 			label.setFont(Font.font(28));
 			pane.getChildren().add(label);

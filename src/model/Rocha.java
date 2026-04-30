@@ -1,6 +1,7 @@
 package model;
 
 public class Rocha extends Obstaculo {
+
     public Rocha(int id, int eixoX, int eixoY) {
         super(id, eixoX, eixoY);
     }

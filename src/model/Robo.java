@@ -36,45 +36,48 @@ public class Robo {
         this.eixoY = eixoY;
     }
 
-    public void mover(String direcao) throws MovimentoInvalidoException{
+    public void mover(String direcao) throws MovimentoInvalidoException {
         int novoX = this.eixoX;
         int novoY = this.eixoY;
 
-        switch (direcao.toLowerCase()){
-            case "up": novoY++; break;
-            case "down": novoY--; break;
+        switch (direcao.toLowerCase()) {
+            case "up":    novoY++; break;
+            case "down":  novoY--; break;
             case "right": novoX++; break;
-            case "left": novoX--; break;
+            case "left":  novoX--; break;
             default:
-                throw new MovimentoInvalidoException("Comando" + direcao + "desconhecido");
+                throw new MovimentoInvalidoException("Comando " + direcao + " desconhecido");
         }
 
         validarPosicao(novoX, novoY, direcao);
 
         this.eixoX = novoX;
         this.eixoY = novoY;
-        System.out.println("O robo" + cor + "moveu-se para ("+ eixoX +"," + eixoY + ")");
+        System.out.println("O robô " + cor + " moveu-se para (" + eixoX + ", " + eixoY + ")");
     }
 
-    public void mover(int direcao) throws MovimentoInvalidoException{
-        switch(direcao){
-            case 1: mover("up"); break;
-            case 2: mover("down"); break;
+    public void mover(int direcao) throws MovimentoInvalidoException {
+        switch (direcao) {
+            case 1: mover("up");    break;
+            case 2: mover("down");  break;
             case 3: mover("right"); break;
-            case 4: mover("left"); break;
+            case 4: mover("left");  break;
             default:
-                throw new MovimentoInvalidoException("Código" + direcao + "é inválido (use 1 a 4)");
+                throw new MovimentoInvalidoException("Código " + direcao + " é inválido (use 1 a 4)");
         }
     }
 
-    public boolean encontrouAlimento(int alimentoX, int alimentoY){
+    public boolean encontrouAlimento(int alimentoX, int alimentoY) {
         return (this.eixoX == alimentoX && this.eixoY == alimentoY);
     }
 
-    public void validarPosicao(int x, int y, String direcao) throws MovimentoInvalidoException{
-        if (eixoX < 0 || eixoY < 0){
-            throw new MovimentoInvalidoException("Movimento inválido para" + direcao + "O robo pode não entrar em zonas negativas");
+    public void validarPosicao(int x, int y, String direcao) throws MovimentoInvalidoException {
+        int limite = Tabuleiro.TAMANHO - 1;
+        if (x < 0 || y < 0 || x > limite || y > limite) {
+            throw new MovimentoInvalidoException(
+                    "Movimento inválido para " + direcao +
+                            ": posição (" + x + ", " + y + ") fora do tabuleiro"
+            );
         }
     }
-
 }

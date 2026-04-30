@@ -1,5 +1,6 @@
 package controller;
 
+import app.Caminhos;
 import controller.modos.ModoCompetitivoController;
 import controller.modos.ModoInteligenteController;
 import controller.modos.ModoObstaculosController;
@@ -74,9 +75,7 @@ public class JogoController {
         ModoSimplesController modo = new ModoSimplesController();
         labelModo.setText(modo.getNome());
         labelStatus.setText(modo.getDescricao());
-
         if (!modo.configurar(tabuleiro)) return;
-
         habilitarBotoesMovimento(true);
         tabuleiroView.renderizar(tabuleiro);
     }
@@ -131,9 +130,10 @@ public class JogoController {
     public void onVoltarMenu(ActionEvent event) {
         pararTimelineAtiva();
         try {
-            Parent raiz = FXMLLoader.load(
-                    app.App.ANCORA.getResource(app.App.FXML_MENU)
+            FXMLLoader loader = new FXMLLoader(
+                    Caminhos.ANCORA.getResource(Caminhos.FXML_MENU)
             );
+            Parent raiz = loader.load();
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(raiz, 400, 560));
             stage.setMinWidth(400);
@@ -147,7 +147,7 @@ public class JogoController {
     public int[] abrirDialogoPosicao(String titulo) {
         try {
             FXMLLoader loader = new FXMLLoader(
-                    app.App.ANCORA.getResource(app.App.FXML_DIALOGO)
+                    Caminhos.ANCORA.getResource(Caminhos.FXML_DIALOGO)
             );
             Parent raiz = loader.load();
 
@@ -169,12 +169,17 @@ public class JogoController {
         }
     }
 
+
     private void moverRoboComVerificacao(String direcao) {
         if (tabuleiro.getRobos().isEmpty()) return;
         Robo robo = tabuleiro.getRobos().get(0);
+
+        int posAnteriorX = robo.getEixoX();
+        int posAnteriorY = robo.getEixoY();
+
         try {
             robo.mover(direcao);
-            verificarObstaculoNaPosicao(robo);
+            verificarObstaculoNaPosicao(robo, posAnteriorX, posAnteriorY);
             tabuleiro.avancarTurno();
             tabuleiroView.renderizar(tabuleiro);
 
@@ -188,7 +193,7 @@ public class JogoController {
         }
     }
 
-    private void verificarObstaculoNaPosicao(Robo robo) {
+    private void verificarObstaculoNaPosicao(Robo robo, int posAnteriorX, int posAnteriorY) {
         Obstaculo obs = tabuleiro.getObstaculoNaPosicao(
                 robo.getEixoX(), robo.getEixoY()
         );
@@ -200,6 +205,8 @@ public class JogoController {
             tabuleiro.removerObstaculo(obs.getId());
             labelStatus.setText("💥 Robô destruído pela bomba!");
         } else {
+            robo.setEixoX(posAnteriorX);
+            robo.setEixoY(posAnteriorY);
             labelStatus.setText("🪨 Movimento bloqueado pela rocha!");
         }
     }
@@ -208,9 +215,11 @@ public class JogoController {
         String[] direcoes = {"up", "down", "right", "left"};
         for (Robo robo : robos) {
             if (robo.getEixoX() == -1) continue;
+            int posAnteriorX = robo.getEixoX();
+            int posAnteriorY = robo.getEixoY();
             try {
                 robo.mover(direcoes[random.nextInt(4)]);
-                verificarObstaculoNaPosicao(robo);
+                verificarObstaculoNaPosicao(robo, posAnteriorX, posAnteriorY);
             } catch (MovimentoInvalidoException e) {
                 // tenta direção diferente no próximo turno
             }
