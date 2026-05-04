@@ -1,25 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!--
-═══════════════════════════════════════════════════════════
- menu.fxml — Tela inicial do jogo
- Controller: controller.MenuController
-
- LAYOUT: VBox centralizado, fundo escuro, tipografia
- monoespaçada estilo terminal. Cada botão tem cor de
- acento única por modo para identificação visual rápida.
-
- CONCEITO FXML:
- - Tudo que você vê aqui é "declarativo": você descreve
-   O QUÊ quer, não COMO construir.
- - fx:controller → qual classe Java gerencia esta tela.
- - fx:id → apelido do componente para o Controller
-   acessar via @FXML.
- - onAction → qual método do Controller chamar ao clicar.
- - style → CSS inline do JavaFX (subset do CSS web).
-═══════════════════════════════════════════════════════════
--->
-
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Separator?>
@@ -28,68 +8,99 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Rectangle?>
 
-<VBox alignment="CENTER" prefHeight="560" prefWidth="400" spacing="0" style="-fx-background-color: #0A0A18;" xmlns="http://javafx.com/javafx/25.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MenuController">
+<VBox
+    xmlns="http://javafx.com/javafx"
+    xmlns:fx="http://javafx.com/fxml"
+    fx:controller="controller.MenuController"
+    alignment="CENTER"
+    spacing="0"
+    prefWidth="400"
+    prefHeight="600"
+    style="-fx-background-color: #0A0A18;">
 
-    <!-- Faixa decorativa superior (gradiente simulado com Rectangle) -->
-    <Rectangle height="3" style="-fx-fill: linear-gradient(to right, #0A0A18, #4A90D9, #7B4FD9, #0A0A18);" width="400" />
+    <Rectangle width="400" height="3"
+        style="-fx-fill: linear-gradient(to right, #0A0A18, #4A90D9, #7B4FD9, #0A0A18);"/>
 
-    <!-- ── Bloco de título ── -->
-    <VBox alignment="CENTER" spacing="6" style="-fx-padding: 42 40 32 40;">
-
-        <Label style="-fx-font-family: 'Courier New';                       -fx-font-size: 10px;                       -fx-text-fill: #3A5A8A;                       -fx-letter-spacing: 3px;" text="[ SISTEMA DE NAVEGAÇÃO ]" />
-
-        <Label style="-fx-font-family: 'Courier New';                       -fx-font-size: 36px;                       -fx-font-weight: bold;                       -fx-text-fill: #E8E8FF;                       -fx-letter-spacing: 8px;" text="ROBÔ GAME" />
-
-        <!-- Linha decorativa sob o título -->
+    <!-- Título -->
+    <VBox alignment="CENTER" spacing="6" style="-fx-padding: 32 40 24 40;">
+        <Label text="[ SISTEMA DE NAVEGAÇÃO ]"
+               style="-fx-font-family: 'Courier New'; -fx-font-size: 10px;
+                      -fx-text-fill: #3A5A8A; -fx-letter-spacing: 3px;"/>
+        <Label text="ROBÔ GAME"
+               style="-fx-font-family: 'Courier New'; -fx-font-size: 34px;
+                      -fx-font-weight: bold; -fx-text-fill: #E8E8FF;
+                      -fx-letter-spacing: 8px;"/>
         <HBox alignment="CENTER" spacing="4" style="-fx-padding: 4 0 0 0;">
-            <Rectangle height="1" style="-fx-fill: #2A2A5A;" width="40" />
-            <Rectangle height="1" style="-fx-fill: #4A90D9;" width="80" />
-            <Rectangle height="1" style="-fx-fill: #2A2A5A;" width="40" />
+            <Rectangle width="40" height="1" style="-fx-fill: #2A2A5A;"/>
+            <Rectangle width="80" height="1" style="-fx-fill: #4A90D9;"/>
+            <Rectangle width="40" height="1" style="-fx-fill: #2A2A5A;"/>
         </HBox>
-
-        <Label style="-fx-font-family: 'Courier New';                       -fx-font-size: 11px;                       -fx-text-fill: #3A3A6A;                       -fx-padding: 4 0 0 0;" text="selecione o modo de operação" />
+        <Label text="selecione o modo de operação"
+               style="-fx-font-family: 'Courier New'; -fx-font-size: 11px;
+                      -fx-text-fill: #3A3A6A; -fx-padding: 2 0 0 0;"/>
     </VBox>
 
-    <!-- ── Botões de modo ── -->
-    <!--
-        Cada botão tem cor de acento única:
-          Simples      → azul   (#90CAF9)
-          Competitivo  → roxo   (#CE93D8)
-          Inteligente  → dourado(#FFD54F)
-          Obstáculos   → vermelho (#EF9A9A)
-        Isso permite identificar o modo pelo
-        código de cor, sem precisar ler o texto.
-    -->
-    <VBox spacing="10" style="-fx-padding: 0 48 0 48;">
+    <!-- Botões -->
+    <VBox spacing="9" style="-fx-padding: 0 48 0 48;">
 
-        <Button fx:id="btnSimples" maxWidth="Infinity" onAction="#onModoSimples" style="-fx-background-color: #0D1F3C;                        -fx-border-color: #1E4A8A;                        -fx-border-width: 1;                        -fx-border-radius: 4;                        -fx-background-radius: 4;                        -fx-text-fill: #90CAF9;                        -fx-font-family: 'Courier New';                        -fx-font-size: 13px;                        -fx-cursor: hand;                        -fx-padding: 14 20;" text="01  ·  MODO SIMPLES" />
+        <!-- Simples — azul -->
+        <Button text="01  ·  MODO SIMPLES"
+                maxWidth="Infinity" onAction="#onModoSimples"
+                style="-fx-background-color: #0D1F3C; -fx-border-color: #1E4A8A;
+                       -fx-border-width: 1; -fx-border-radius: 4; -fx-background-radius: 4;
+                       -fx-text-fill: #90CAF9; -fx-font-family: 'Courier New';
+                       -fx-font-size: 13px; -fx-cursor: hand; -fx-padding: 12 20;"/>
 
-        <Button fx:id="btnCompetitivo" maxWidth="Infinity" onAction="#onModoCompetitivo" style="-fx-background-color: #1A0D3C;                        -fx-border-color: #4A2A8A;                        -fx-border-width: 1;                        -fx-border-radius: 4;                        -fx-background-radius: 4;                        -fx-text-fill: #CE93D8;                        -fx-font-family: 'Courier New';                        -fx-font-size: 13px;                        -fx-cursor: hand;                        -fx-padding: 14 20;" text="02  ·  MODO COMPETITIVO" />
+        <!-- Competitivo — roxo -->
+        <Button text="02  ·  MODO COMPETITIVO"
+                maxWidth="Infinity" onAction="#onModoCompetitivo"
+                style="-fx-background-color: #1A0D3C; -fx-border-color: #4A2A8A;
+                       -fx-border-width: 1; -fx-border-radius: 4; -fx-background-radius: 4;
+                       -fx-text-fill: #CE93D8; -fx-font-family: 'Courier New';
+                       -fx-font-size: 13px; -fx-cursor: hand; -fx-padding: 12 20;"/>
 
-        <Button fx:id="btnInteligente" maxWidth="Infinity" onAction="#onModoInteligente" style="-fx-background-color: #2A1F00;                        -fx-border-color: #7A5A00;                        -fx-border-width: 1;                        -fx-border-radius: 4;                        -fx-background-radius: 4;                        -fx-text-fill: #FFD54F;                        -fx-font-family: 'Courier New';                        -fx-font-size: 13px;                        -fx-cursor: hand;                        -fx-padding: 14 20;" text="03  ·  MODO INTELIGENTE" />
+        <!-- Inteligente — dourado -->
+        <Button text="03  ·  MODO INTELIGENTE"
+                maxWidth="Infinity" onAction="#onModoInteligente"
+                style="-fx-background-color: #2A1F00; -fx-border-color: #7A5A00;
+                       -fx-border-width: 1; -fx-border-radius: 4; -fx-background-radius: 4;
+                       -fx-text-fill: #FFD54F; -fx-font-family: 'Courier New';
+                       -fx-font-size: 13px; -fx-cursor: hand; -fx-padding: 12 20;"/>
 
-        <Button fx:id="btnObstaculos" maxWidth="Infinity" onAction="#onModoObstaculos" style="-fx-background-color: #2A0D0D;                        -fx-border-color: #8A2020;                        -fx-border-width: 1;                        -fx-border-radius: 4;                        -fx-background-radius: 4;                        -fx-text-fill: #EF9A9A;                        -fx-font-family: 'Courier New';                        -fx-font-size: 13px;                        -fx-cursor: hand;                        -fx-padding: 14 20;" text="04  ·  MODO OBSTÁCULOS" />
+        <!-- Obstáculos — vermelho -->
+        <Button text="04  ·  MODO OBSTÁCULOS"
+                maxWidth="Infinity" onAction="#onModoObstaculos"
+                style="-fx-background-color: #2A0D0D; -fx-border-color: #8A2020;
+                       -fx-border-width: 1; -fx-border-radius: 4; -fx-background-radius: 4;
+                       -fx-text-fill: #EF9A9A; -fx-font-family: 'Courier New';
+                       -fx-font-size: 13px; -fx-cursor: hand; -fx-padding: 12 20;"/>
+
+        <!-- Estratégico — verde-teal (novo) -->
+        <Button text="05  ·  MODO ESTRATÉGICO"
+                maxWidth="Infinity" onAction="#onModoEstrategico"
+                style="-fx-background-color: #0A2A20; -fx-border-color: #1A7A55;
+                       -fx-border-width: 1; -fx-border-radius: 4; -fx-background-radius: 4;
+                       -fx-text-fill: #80CBC4; -fx-font-family: 'Courier New';
+                       -fx-font-size: 13px; -fx-cursor: hand; -fx-padding: 12 20;"/>
+
     </VBox>
 
-    <!-- Espaço flexível empurra o rodapé para baixo -->
-    <!--
-        Region com VBox.vgrow="ALWAYS" é o equivalente
-        JavaFX de "flex: 1" no CSS — ocupa todo o espaço
-        disponível, empurrando o rodapé para o fundo.
-    -->
-    <Region VBox.vgrow="ALWAYS" />
+    <Region VBox.vgrow="ALWAYS"/>
 
-    <!-- ── Rodapé ── -->
-    <VBox alignment="CENTER" spacing="4" style="-fx-padding: 0 40 28 40;">
-        <Separator style="-fx-background-color: #1A1A3A;" />
-        <HBox alignment="CENTER" spacing="16" style="-fx-padding: 10 0 0 0;">
-            <Label style="-fx-font-family: 'Courier New';                           -fx-font-size: 10px;                           -fx-text-fill: #252545;" text="POO" />
-            <Label style="-fx-font-family: 'Courier New';                           -fx-font-size: 10px;                           -fx-text-fill: #252545;" text="·" />
-            <Label style="-fx-font-family: 'Courier New';                           -fx-font-size: 10px;                           -fx-text-fill: #252545;" text="UECE  ©  2026" />
+    <!-- Rodapé -->
+    <VBox alignment="CENTER" spacing="4" style="-fx-padding: 0 40 24 40;">
+        <Separator style="-fx-background-color: #1A1A3A;"/>
+        <HBox alignment="CENTER" spacing="16" style="-fx-padding: 8 0 0 0;">
+            <Label text="PET Computação"
+                   style="-fx-font-family: 'Courier New'; -fx-font-size: 10px; -fx-text-fill: #252545;"/>
+            <Label text="·"
+                   style="-fx-font-family: 'Courier New'; -fx-font-size: 10px; -fx-text-fill: #252545;"/>
+            <Label text="UECE  ©  2026"
+                   style="-fx-font-family: 'Courier New'; -fx-font-size: 10px; -fx-text-fill: #252545;"/>
         </HBox>
     </VBox>
 
-    <!-- Faixa decorativa inferior (espelhada) -->
-    <Rectangle height="3" style="-fx-fill: linear-gradient(to right, #0A0A18, #7B4FD9, #4A90D9, #0A0A18);" width="400" />
+    <Rectangle width="400" height="3"
+        style="-fx-fill: linear-gradient(to right, #0A0A18, #7B4FD9, #4A90D9, #0A0A18);"/>
 
 </VBox>

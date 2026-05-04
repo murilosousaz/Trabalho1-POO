@@ -13,10 +13,11 @@ import java.io.IOException;
 
 public class MenuController {
 
-    @FXML public void onModoSimples(ActionEvent e)     { navegar(e, "simples");     }
-    @FXML public void onModoCompetitivo(ActionEvent e) { navegar(e, "competitivo"); }
-    @FXML public void onModoInteligente(ActionEvent e) { navegar(e, "inteligente"); }
-    @FXML public void onModoObstaculos(ActionEvent e)  { navegar(e, "obstaculos");  }
+    @FXML public void onModoSimples(ActionEvent e)      { navegar(e, "simples");     }
+    @FXML public void onModoCompetitivo(ActionEvent e)  { navegar(e, "competitivo"); }
+    @FXML public void onModoInteligente(ActionEvent e)  { navegar(e, "inteligente"); }
+    @FXML public void onModoObstaculos(ActionEvent e)   { navegar(e, "obstaculos");  }
+    @FXML public void onModoEstrategico(ActionEvent e)  { navegar(e, "estrategico"); }
 
     private void navegar(ActionEvent event, String modo) {
         try {
@@ -34,8 +35,6 @@ public class MenuController {
             stage.setMinHeight(580);
             stage.show();
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException e) { e.printStackTrace(); }
     }
 }

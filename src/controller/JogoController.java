@@ -1,10 +1,7 @@
 package controller;
 
 import app.Caminhos;
-import controller.modos.ModoCompetitivoController;
-import controller.modos.ModoInteligenteController;
-import controller.modos.ModoObstaculosController;
-import controller.modos.ModoSimplesController;
+import controller.modos.*;
 import exceptions.MovimentoInvalidoException;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -20,9 +17,7 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import model.Obstaculo;
-import model.Robo;
-import model.Tabuleiro;
+import model.*;
 import view.EntradaDados;
 import view.TabuleiroView;
 
@@ -46,31 +41,40 @@ public class JogoController {
     private Timeline      timelineAtiva;
     private final Random  random = new Random();
 
+    // Contexto do modo Estratégico — null nos outros modos
+    private Alimento        alimentoObjeto;
+    private RoboEstrategico roboEstrategico;
+    private RoboMemoria     roboMemoria;
+
     @FXML
     public void initialize() {
         tabuleiro     = new Tabuleiro();
         tabuleiroView = new TabuleiroView(gridTabuleiro);
-
         tabuleiro.turnoAtualProperty().addListener(
                 (obs, antigo, novo) -> labelTurno.setText("Turno: " + novo)
         );
-
         habilitarBotoesMovimento(false);
         tabuleiroView.renderizar(tabuleiro);
     }
 
+    //  iniciarModo() — ponto de entrada único para todos os modos
     public void iniciarModo(String modo) {
-        tabuleiro.resetar();
         pararTimelineAtiva();
+        tabuleiro.resetar();
+        alimentoObjeto  = null;
+        roboEstrategico = null;
+        roboMemoria     = null;
 
         switch (modo) {
-            case "simples"     -> iniciarSimples();
-            case "competitivo" -> iniciarAutomatico(new ModoCompetitivoController());
-            case "inteligente" -> iniciarAutomatico(new ModoInteligenteController());
-            case "obstaculos"  -> iniciarAutomatico(new ModoObstaculosController());
+            case "simples"      -> iniciarSimples();
+            case "competitivo"  -> iniciarAutomatico(new ModoCompetitivoController());
+            case "inteligente"  -> iniciarAutomatico(new ModoInteligenteController());
+            case "obstaculos"   -> iniciarAutomatico(new ModoObstaculosController());
+            case "estrategico"  -> iniciarEstrategico();
         }
     }
 
+    // ── Modo Simples (manual) ────────────────────────────────
     private void iniciarSimples() {
         ModoSimplesController modo = new ModoSimplesController();
         labelModo.setText(modo.getNome());
@@ -80,6 +84,7 @@ public class JogoController {
         tabuleiroView.renderizar(tabuleiro);
     }
 
+    // ── Modos automáticos com Timeline ──────────────────────
     private void iniciarAutomatico(ModoCompetitivoController modo) {
         labelModo.setText(modo.getNome());
         labelStatus.setText(modo.getDescricao());
@@ -107,107 +112,107 @@ public class JogoController {
         iniciarTimeline(modo.getIntervaloMs(), this::tickAutomatico);
     }
 
+    // ── Modo Estratégico ────────────────────────────────────
+    private void iniciarEstrategico() {
+        ModoEstrategicoController modo = new ModoEstrategicoController();
+        labelModo.setText(modo.getNome());
+        labelStatus.setText(modo.getDescricao());
+        habilitarBotoesMovimento(false);
+        if (!modo.configurar(tabuleiro)) return;
+
+        // Guarda referências tipadas para uso no tick
+        alimentoObjeto  = modo.getAlimento();
+        roboEstrategico = modo.getRoboEstrategico();
+        roboMemoria     = modo.getRoboMemoria();
+
+        tabuleiroView.renderizar(tabuleiro);
+        iniciarTimeline(modo.getIntervaloMs(), this::tickEstrategico);
+    }
+
     private void tickAutomatico() {
         executarTurnoAleatorio(tabuleiro.getRobos());
         tabuleiroView.renderizar(tabuleiro);
         tabuleiro.avancarTurno();
 
         if (tabuleiro.todosRobosDestruidos()) {
-            labelStatus.setText("💀 Todos os robôs foram destruídos!");
-            pararTimelineAtiva();
+            encerrar("💀 Todos os robôs foram destruídos!");
         } else if (tabuleiro.algumRoboEncontrouAlimento()) {
-            labelStatus.setText("🏆 Alimento encontrado!");
-            pararTimelineAtiva();
+            encerrar("🏆 Alimento encontrado!\n" + tabuleiro.getPlacar());
         }
     }
 
-    @FXML public void onMoverCima()     { moverRoboComVerificacao("up");    }
-    @FXML public void onMoverBaixo()    { moverRoboComVerificacao("down");  }
-    @FXML public void onMoverDireita()  { moverRoboComVerificacao("right"); }
-    @FXML public void onMoverEsquerda() { moverRoboComVerificacao("left");  }
+    private void tickEstrategico() {
+        // Move RoboEstrategico (se vivo e ainda não chegou)
+        if (roboEstrategico.getEixoX() != -1
+                && !roboEstrategico.encontrouAlimento(
+                alimentoObjeto.getEixoX(), alimentoObjeto.getEixoY())) {
 
-    @FXML
-    public void onVoltarMenu(ActionEvent event) {
-        pararTimelineAtiva();
-        try {
-            FXMLLoader loader = new FXMLLoader(
-                    Caminhos.ANCORA.getResource(Caminhos.FXML_MENU)
-            );
-            Parent raiz = loader.load();
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(raiz, 400, 560));
-            stage.setMinWidth(400);
-            stage.setMinHeight(560);
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public int[] abrirDialogoPosicao(String titulo) {
-        try {
-            FXMLLoader loader = new FXMLLoader(
-                    Caminhos.ANCORA.getResource(Caminhos.FXML_DIALOGO)
-            );
-            Parent raiz = loader.load();
-
-            DialogoPosicaoController ctrl = loader.getController();
-            ctrl.setTitulo(titulo);
-
-            Stage dialogo = new Stage();
-            dialogo.initModality(Modality.APPLICATION_MODAL);
-            dialogo.setTitle(titulo);
-            dialogo.setScene(new Scene(raiz));
-            dialogo.setResizable(false);
-            dialogo.showAndWait();
-
-            return ctrl.getResultado();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-
-    private void moverRoboComVerificacao(String direcao) {
-        if (tabuleiro.getRobos().isEmpty()) return;
-        Robo robo = tabuleiro.getRobos().get(0);
-
-        int posAnteriorX = robo.getEixoX();
-        int posAnteriorY = robo.getEixoY();
-
-        try {
-            robo.mover(direcao);
-            verificarObstaculoNaPosicao(robo, posAnteriorX, posAnteriorY);
-            tabuleiro.avancarTurno();
-            tabuleiroView.renderizar(tabuleiro);
-
-            if (tabuleiro.algumRoboEncontrouAlimento()) {
-                labelStatus.setText("🏆 Alimento encontrado!");
-                habilitarBotoesMovimento(false);
-                EntradaDados.mostrarInfo("Parabéns!", "O robô encontrou o alimento!");
+            int px = roboEstrategico.getEixoX();
+            int py = roboEstrategico.getEixoY();
+            try {
+                roboEstrategico.moverEmDirecaoAo(alimentoObjeto, tabuleiro);
+                verificarColisoes(roboEstrategico, px, py);
+            } catch (MovimentoInvalidoException e) {
+                labelStatus.setText("⚠ Estratégico: " + e.getMessage());
             }
-        } catch (MovimentoInvalidoException e) {
-            labelStatus.setText("⚠ " + e.getMessage());
+        }
+
+        // Move RoboMemoria (se vivo e ainda não chegou)
+        if (roboMemoria.getEixoX() != -1
+                && !roboMemoria.encontrouAlimento(
+                alimentoObjeto.getEixoX(), alimentoObjeto.getEixoY())) {
+
+            int px = roboMemoria.getEixoX();
+            int py = roboMemoria.getEixoY();
+            try {
+                roboMemoria.moverComMemoria(alimentoObjeto, tabuleiro);
+                verificarColisoes(roboMemoria, px, py);
+            } catch (MovimentoInvalidoException e) {
+                labelStatus.setText("⚠ Memória: " + e.getMessage());
+            }
+        }
+
+        tabuleiroView.renderizar(tabuleiro);
+        tabuleiro.avancarTurno();
+
+        // Verifica fim: ambos chegaram OU ambos destruídos OU um chegou e outro morreu
+        boolean eChegou  = roboEstrategico.getEixoX() != -1
+                && roboEstrategico.encontrouAlimento(alimentoObjeto.getEixoX(), alimentoObjeto.getEixoY());
+        boolean eMorreu  = roboEstrategico.getEixoX() == -1;
+        boolean mChegou  = roboMemoria.getEixoX() != -1
+                && roboMemoria.encontrouAlimento(alimentoObjeto.getEixoX(), alimentoObjeto.getEixoY());
+        boolean mMorreu  = roboMemoria.getEixoX() == -1;
+
+        if ((eChegou || eMorreu) && (mChegou || mMorreu)) {
+            String resultado = construirPlacarEstrategico(eChegou, eMorreu, mChegou, mMorreu);
+            encerrar(resultado);
         }
     }
 
-    private void verificarObstaculoNaPosicao(Robo robo, int posAnteriorX, int posAnteriorY) {
-        Obstaculo obs = tabuleiro.getObstaculoNaPosicao(
-                robo.getEixoX(), robo.getEixoY()
-        );
-        if (obs == null) return;
+    private void verificarColisoes(Robo robo, int posAnteriorX, int posAnteriorY) {
+        // 1. Obstáculo
+        Obstaculo obs = tabuleiro.getObstaculoNaPosicao(robo.getEixoX(), robo.getEixoY());
+        if (obs != null) {
+            obs.bater(robo);
+            if (robo.getEixoX() == -1) {
+                tabuleiro.removerObstaculo(obs.getId());
+                labelStatus.setText("💥 Robô " + robo.getCor() + " destruído pela bomba!");
+            } else {
+                // Rocha: recua e notifica memória se aplicável
+                if (robo instanceof RoboMemoria)
+                    ((RoboMemoria) robo).notificarRocha(robo.getEixoX(), robo.getEixoY());
+                robo.setEixoX(posAnteriorX);
+                robo.setEixoY(posAnteriorY);
+                labelStatus.setText("🪨 Robô " + robo.getCor() + " bloqueado pela rocha!");
+            }
+            return;
+        }
 
-        obs.bater(robo);
-
-        if (robo.getEixoX() == -1) {
-            tabuleiro.removerObstaculo(obs.getId());
-            labelStatus.setText("💥 Robô destruído pela bomba!");
-        } else {
+        // 2. Colisão entre robôs
+        if (tabuleiro.posicaoOcupadaPorRobo(robo.getEixoX(), robo.getEixoY(), robo)) {
             robo.setEixoX(posAnteriorX);
             robo.setEixoY(posAnteriorY);
-            labelStatus.setText("🪨 Movimento bloqueado pela rocha!");
+            labelStatus.setText("🤖 Robô " + robo.getCor() + " colidiu com outro robô!");
         }
     }
 
@@ -215,15 +220,87 @@ public class JogoController {
         String[] direcoes = {"up", "down", "right", "left"};
         for (Robo robo : robos) {
             if (robo.getEixoX() == -1) continue;
-            int posAnteriorX = robo.getEixoX();
-            int posAnteriorY = robo.getEixoY();
+            int px = robo.getEixoX(), py = robo.getEixoY();
             try {
                 robo.mover(direcoes[random.nextInt(4)]);
-                verificarObstaculoNaPosicao(robo, posAnteriorX, posAnteriorY);
-            } catch (MovimentoInvalidoException e) {
-                // tenta direção diferente no próximo turno
-            }
+                verificarColisoes(robo, px, py);
+            } catch (MovimentoInvalidoException e) { /* tenta no próximo turno */ }
         }
+    }
+
+    @FXML public void onMoverCima()     { moverSimples("up");    }
+    @FXML public void onMoverBaixo()    { moverSimples("down");  }
+    @FXML public void onMoverDireita()  { moverSimples("right"); }
+    @FXML public void onMoverEsquerda() { moverSimples("left");  }
+
+    private void moverSimples(String direcao) {
+        if (tabuleiro.getRobos().isEmpty()) return;
+        Robo robo = tabuleiro.getRobos().get(0);
+        int px = robo.getEixoX(), py = robo.getEixoY();
+        try {
+            robo.mover(direcao);
+            verificarColisoes(robo, px, py);
+            tabuleiro.avancarTurno();
+            tabuleiroView.renderizar(tabuleiro);
+            if (tabuleiro.algumRoboEncontrouAlimento()) {
+                habilitarBotoesMovimento(false);
+                encerrar("🏆 Parabéns!\n" + tabuleiro.getPlacar());
+            }
+        } catch (MovimentoInvalidoException e) {
+            labelStatus.setText("⚠ " + e.getMessage());
+        }
+    }
+
+    @FXML
+    public void onVoltarMenu(ActionEvent event) {
+        pararTimelineAtiva();
+        try {
+            FXMLLoader loader = new FXMLLoader(Caminhos.ANCORA.getResource(Caminhos.FXML_MENU));
+            Parent raiz = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(raiz, 400, 600));
+            stage.setMinWidth(400);
+            stage.setMinHeight(600);
+            stage.show();
+        } catch (IOException e) { e.printStackTrace(); }
+    }
+
+    public int[] abrirDialogoPosicao(String titulo) {
+        try {
+            FXMLLoader loader = new FXMLLoader(Caminhos.ANCORA.getResource(Caminhos.FXML_DIALOGO));
+            Parent raiz = loader.load();
+            DialogoPosicaoController ctrl = loader.getController();
+            ctrl.setTitulo(titulo);
+            Stage dialogo = new Stage();
+            dialogo.initModality(Modality.APPLICATION_MODAL);
+            dialogo.setTitle(titulo);
+            dialogo.setScene(new Scene(raiz));
+            dialogo.setResizable(false);
+            dialogo.showAndWait();
+            return ctrl.getResultado();
+        } catch (IOException e) { e.printStackTrace(); return null; }
+    }
+
+    private void encerrar(String mensagem) {
+        labelStatus.setText(mensagem);
+        pararTimelineAtiva();
+        habilitarBotoesMovimento(false);
+        EntradaDados.mostrarInfo("Fim de jogo", mensagem);
+    }
+
+    private String construirPlacarEstrategico(
+            boolean eChegou, boolean eMorreu,
+            boolean mChegou, boolean mMorreu) {
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Robô Estratégico (azul): ")
+                .append(eChegou ? "✅ Chegou" : eMorreu ? "💥 Destruído" : "❌ Não chegou")
+                .append("\n");
+        sb.append("Robô Memória (dourado): ")
+                .append(mChegou ? "✅ Chegou" : mMorreu ? "💥 Destruído" : "❌ Não chegou")
+                .append("\n\n");
+        sb.append(tabuleiro.getPlacar());
+        return sb.toString();
     }
 
     private void iniciarTimeline(int intervaloMs, Runnable acao) {
@@ -235,10 +312,7 @@ public class JogoController {
     }
 
     private void pararTimelineAtiva() {
-        if (timelineAtiva != null) {
-            timelineAtiva.stop();
-            timelineAtiva = null;
-        }
+        if (timelineAtiva != null) { timelineAtiva.stop(); timelineAtiva = null; }
     }
 
     private void habilitarBotoesMovimento(boolean habilitar) {

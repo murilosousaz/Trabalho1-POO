@@ -6,34 +6,37 @@ public class Robo {
     private int eixoX;
     private int eixoY;
     private String cor;
+    private int movimentosValidos   = 0;
+    private int movimentosInvalidos = 0;
 
-    public Robo() {
-    }
+    private EstrategiaMovimento estrategia;
+
+    public Robo() {}
 
     public Robo(String cor) {
-        this.cor = cor;
-        this.eixoY = 0;
+        this.cor   = cor;
         this.eixoX = 0;
+        this.eixoY = 0;
     }
 
-    public String getCor() {
-        return cor;
+    public Robo(String cor, EstrategiaMovimento estrategia) {
+        this(cor);
+        this.estrategia = estrategia;
     }
 
-    public int getEixoX() {
-        return eixoX;
+    public void setEstrategia(EstrategiaMovimento estrategia) {
+        this.estrategia = estrategia;
     }
 
-    public void setEixoX(int eixoX) {
-        this.eixoX = eixoX;
-    }
+    public EstrategiaMovimento getEstrategia() { return estrategia; }
 
-    public int getEixoY() {
-        return eixoY;
-    }
-
-    public void setEixoY(int eixoY) {
-        this.eixoY = eixoY;
+    public String moverComEstrategia(Alimento alimento, Tabuleiro tabuleiro)
+            throws MovimentoInvalidoException {
+        if (estrategia == null)
+            throw new IllegalStateException("Robô " + cor + " não tem estratégia definida.");
+        String direcao = estrategia.escolherMovimento(this, alimento, tabuleiro);
+        mover(direcao);
+        return direcao;
     }
 
     public void mover(String direcao) throws MovimentoInvalidoException {
@@ -46,13 +49,20 @@ public class Robo {
             case "right": novoX++; break;
             case "left":  novoX--; break;
             default:
+                movimentosInvalidos++;
                 throw new MovimentoInvalidoException("Comando " + direcao + " desconhecido");
         }
 
-        validarPosicao(novoX, novoY, direcao);
+        try {
+            validarPosicao(novoX, novoY, direcao);
+        } catch (MovimentoInvalidoException e) {
+            movimentosInvalidos++;
+            throw e;
+        }
 
         this.eixoX = novoX;
         this.eixoY = novoY;
+        movimentosValidos++;
         System.out.println("O robô " + cor + " moveu-se para (" + eixoX + ", " + eixoY + ")");
     }
 
@@ -63,21 +73,35 @@ public class Robo {
             case 3: mover("right"); break;
             case 4: mover("left");  break;
             default:
-                throw new MovimentoInvalidoException("Código " + direcao + " é inválido (use 1 a 4)");
+                movimentosInvalidos++;
+                throw new MovimentoInvalidoException("Código " + direcao + " é inválido");
         }
-    }
-
-    public boolean encontrouAlimento(int alimentoX, int alimentoY) {
-        return (this.eixoX == alimentoX && this.eixoY == alimentoY);
     }
 
     public void validarPosicao(int x, int y, String direcao) throws MovimentoInvalidoException {
         int limite = Tabuleiro.TAMANHO - 1;
-        if (x < 0 || y < 0 || x > limite || y > limite) {
+        if (x < 0 || y < 0 || x > limite || y > limite)
             throw new MovimentoInvalidoException(
                     "Movimento inválido para " + direcao +
                             ": posição (" + x + ", " + y + ") fora do tabuleiro"
             );
-        }
     }
+
+    public boolean encontrouAlimento(int alimentoX, int alimentoY) {
+        return this.eixoX == alimentoX && this.eixoY == alimentoY;
+    }
+
+    public String getResumoMovimentos() {
+        return "Robô " + cor
+                + " → válidos: "   + movimentosValidos
+                + " | inválidos: " + movimentosInvalidos;
+    }
+
+    public String getCor()                { return cor; }
+    public int getEixoX()                 { return eixoX; }
+    public int getEixoY()                 { return eixoY; }
+    public void setEixoX(int x)           { this.eixoX = x; }
+    public void setEixoY(int y)           { this.eixoY = y; }
+    public int getMovimentosValidos()     { return movimentosValidos; }
+    public int getMovimentosInvalidos()   { return movimentosInvalidos; }
 }
