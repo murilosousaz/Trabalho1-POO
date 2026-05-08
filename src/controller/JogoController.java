@@ -1,10 +1,7 @@
 package controller;
 
 import app.Caminhos;
-import controller.modos.ModoCompetitivoController;
-import controller.modos.ModoInteligenteController;
-import controller.modos.ModoObstaculosController;
-import controller.modos.ModoSimplesController;
+import controller.modos.*;
 import exceptions.MovimentoInvalidoException;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -65,10 +62,11 @@ public class JogoController {
         pararTimelineAtiva();
 
         switch (modo) {
-            case "simples"     -> iniciarSimples();
-            case "competitivo" -> iniciarAutomatico(new ModoCompetitivoController());
-            case "inteligente" -> iniciarAutomatico(new ModoInteligenteController());
-            case "obstaculos"  -> iniciarAutomatico(new ModoObstaculosController());
+            case "simples"      -> iniciarSimples();
+            case "competitivo"  -> iniciarAutomatico(new ModoCompetitivoController());
+            case "inteligente"  -> iniciarAutomatico(new ModoInteligenteController());
+            case "obstaculos"   -> iniciarAutomatico(new ModoObstaculosController());
+            case "estrategico" -> iniciarEstrategico(new ModoEstrategicoController());
         }
     }
 
@@ -120,6 +118,15 @@ public class JogoController {
             labelStatus.setText("🏆 Alimento encontrado!");
             pararTimelineAtiva();
         }
+    }
+
+    private void iniciarEstrategico(ModoEstrategicoController modo) {
+        labelModo.setText(modo.getNome());
+        labelStatus.setText(modo.getDescricao());
+        habilitarBotoesMovimento(false);
+        if (!modo.configurar(tabuleiro)) return;
+        tabuleiroView.renderizar(tabuleiro);
+        iniciarTimeline(modo.getIntervaloMs(), this::tickAutomatico);
     }
 
     @FXML public void onMoverCima()     { moverRoboComVerificacao("up");    }
